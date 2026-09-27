@@ -1,14 +1,12 @@
 name: Android
 
-# Manual-only while the repository is private (Actions minutes are billed).
-# Once it is public, uncomment the push/pull_request triggers.
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [master]
-  #   paths: ["android/**", ".github/workflows/android.yml"]
-  # pull_request:
-  #   paths: ["android/**", ".github/workflows/android.yml"]
+  push:
+    branches: [master]
+    paths: ["android/**", ".github/workflows/android.yml"]
+  pull_request:
+    paths: ["android/**", ".github/workflows/android.yml"]
 
 concurrency:
   group: android-${{ github.ref }}
