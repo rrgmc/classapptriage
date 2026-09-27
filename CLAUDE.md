@@ -26,4 +26,4 @@ cd android && ./gradlew testDebugUnitTest lintDebug assembleDebug
 
 ## CI
 
-`.github/workflows/android.yml` runs test, lint and a debug build on pushes to `master` and on pull requests, when they touch `android/**` or the workflow itself. It can also be dispatched manually. Still run the build locally before pushing.
+`.github/workflows/android.yml` runs test, lint and a debug build on pushes to `master` and on pull requests, when they touch `android/**` or the workflow itself. It can also be dispatched manually. Pushing a `v*` tag also attaches the debug APK to that tag's GitHub release, creating the release if needed. Still run the build locally before pushing.
