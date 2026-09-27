@@ -1,0 +1,176 @@
+<resources>
+    <string name="app_name">ClassApp Triage</string>
+
+    <!-- Common -->
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="back">Back</string>
+    <string name="more">More</string>
+    <string name="retry">Retry</string>
+    <string name="log_out">Log out</string>
+
+    <!-- Errors -->
+    <string name="error_generic">ClassApp error</string>
+    <string name="error_invalid_input">Invalid input</string>
+    <string name="error_network">Network error. Check your connection.</string>
+
+    <!-- Login -->
+    <string name="login_subtitle">Sign in with your ClassApp account. Only the access token is stored on this device.</string>
+    <string name="login_contact">Email or phone</string>
+    <string name="login_password">Password</string>
+    <string name="login_show_password">Show password</string>
+    <string name="login_hide_password">Hide password</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_session_expired">Your session expired. Please sign in again.</string>
+    <string name="login_code">Verification code</string>
+    <string name="login_verify">Verify</string>
+    <string name="login_resend">Resend code</string>
+    <string name="login_other_account">Use a different account</string>
+    <string name="login_code_sent">A verification code was sent to %1$s.</string>
+    <string name="login_code_resent">A new code was sent to %1$s.</string>
+
+    <!-- Inbox picker -->
+    <string name="entities_title">Choose inbox</string>
+    <string name="entities_signed_in_as">Signed in as %1$s</string>
+    <string name="entities_disabled">disabled</string>
+    <string name="entities_id">id %1$d</string>
+    <string name="entities_selected">Selected</string>
+
+    <!-- Messages -->
+    <string name="messages_title">Messages</string>
+    <string name="tab_important">Important (%1$d)</string>
+    <string name="tab_routine">Routine (%1$d)</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_rules">Rules</string>
+    <string name="action_switch_inbox">Switch inbox</string>
+    <string name="action_messages_to_scan">Messages to scan: %1$d</string>
+    <string name="action_notify_important">Notify new important messages</string>
+    <string name="action_clear_selection">Clear selection</string>
+    <string name="action_select_all">Select all in tab</string>
+    <string name="action_mark_read">Mark read</string>
+    <string name="action_mark_unread">Mark unread</string>
+    <string name="action_create_rule">Create rule from sender/label</string>
+    <string name="action_mark_all_read">Mark all read</string>
+    <string name="action_delete_all">Delete all</string>
+    <string name="dialog_delete_title">Delete messages</string>
+    <string name="dialog_read_title">Mark as read</string>
+    <string name="messages_none_routine">No routine messages.</string>
+    <string name="messages_none_important">No important messages.</string>
+    <string name="messages_load_older">Load older messages</string>
+    <string name="scan_title">Messages to scan</string>
+    <string name="scan_label">Most recent messages to load</string>
+    <string name="row_rule">rule: %1$s</string>
+    <string name="row_read">✓ read</string>
+    <string name="row_unread">unread</string>
+    <string name="row_sent">Sent</string>
+    <string name="row_received">Received</string>
+    <string name="row_images">Images</string>
+    <string name="row_videos">Videos</string>
+    <string name="row_audios">Audio</string>
+    <string name="row_files">Files</string>
+    <string name="row_surveys">Poll</string>
+    <string name="row_reports">Report</string>
+    <string name="row_forms">Form</string>
+    <string name="row_commitments">Event</string>
+    <string name="row_charges">Charge</string>
+    <plurals name="selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <plurals name="confirm_delete_selected">
+        <item quantity="one">Delete the selected message?</item>
+        <item quantity="other">Delete %d selected messages?</item>
+    </plurals>
+    <plurals name="confirm_read_all_routine">
+        <item quantity="one">Mark the routine message as read?</item>
+        <item quantity="other">Mark all %d routine messages as read?</item>
+    </plurals>
+    <plurals name="confirm_delete_all_routine">
+        <item quantity="one">Delete the routine message?</item>
+        <item quantity="other">Delete all %d routine messages?</item>
+    </plurals>
+    <plurals name="info_deleted">
+        <item quantity="one">Deleted %d message</item>
+        <item quantity="other">Deleted %d messages</item>
+    </plurals>
+    <plurals name="info_marked_read">
+        <item quantity="one">Marked %d message as read</item>
+        <item quantity="other">Marked %d messages as read</item>
+    </plurals>
+    <plurals name="info_marked_unread">
+        <item quantity="one">Marked %d message as unread</item>
+        <item quantity="other">Marked %d messages as unread</item>
+    </plurals>
+
+    <!-- Rules -->
+    <string name="rules_title">Triage rules</string>
+    <string name="rules_help">Important rules win over routine rules. Messages that match no rule are important. Within a rule every filled field must match; comma-separated values match any.</string>
+    <string name="group_important">Important</string>
+    <string name="group_routine">Routine</string>
+    <string name="rules_add">Add</string>
+    <string name="rules_none">No rules.</string>
+    <string name="rules_unnamed">(unnamed)</string>
+    <string name="rules_move_up">Move up</string>
+    <string name="rules_move_down">Move down</string>
+    <string name="rules_delete">Delete rule</string>
+    <string name="rules_delete_text">Delete rule \"%1$s\"?</string>
+    <string name="rules_export_file">Export to file</string>
+    <string name="rules_import_file">Import from file</string>
+    <string name="rules_share_json">Share JSON</string>
+    <string name="rules_share_title">Share rules</string>
+    <string name="rules_copy_json">Copy JSON</string>
+    <string name="rules_paste_json">Paste JSON</string>
+    <string name="rules_reset_defaults">Reset to defaults</string>
+    <string name="rules_reset_title">Reset rules</string>
+    <string name="rules_reset_text">Replace all rules with the built-in defaults?</string>
+    <string name="rules_reset">Reset</string>
+    <string name="rules_exported">Rules exported</string>
+    <string name="rules_imported">Rules imported</string>
+    <string name="rules_copied">Rules copied</string>
+    <string name="rules_nothing_to_import">Nothing to import</string>
+    <string name="rules_invalid_json">Invalid rules JSON: %1$s</string>
+    <string name="rules_export_failed">Export failed: %1$s</string>
+    <string name="rules_import_failed">Import failed: %1$s</string>
+    <string name="cond_label">label = %1$s</string>
+    <string name="cond_label_id">label id = %1$s</string>
+    <string name="cond_sender">sender ~ %1$s</string>
+    <string name="cond_sender_id">sender id = %1$s</string>
+    <string name="cond_prefix">starts with %1$s</string>
+    <string name="cond_contains">contains %1$s</string>
+    <string name="cond_and">" AND "</string>
+    <string name="cond_none">(no conditions — never matches)</string>
+
+    <!-- Rule editor -->
+    <string name="rule_new">New rule</string>
+    <string name="rule_edit">Edit rule</string>
+    <string name="rule_name">Name</string>
+    <string name="rule_help">Every filled field must match. Separate alternatives with commas. Matching ignores case and accents.</string>
+    <string name="rule_labels">Label is (exact title)</string>
+    <string name="rule_senders">Sender name contains</string>
+    <string name="rule_prefixes">Summary starts with</string>
+    <string name="rule_contains">Summary contains</string>
+    <string name="rule_advanced">Advanced</string>
+    <string name="rule_label_ids">Label IDs</string>
+    <string name="rule_sender_ids">Sender IDs</string>
+    <string name="rule_error_name">Give the rule a name.</string>
+    <string name="rule_error_condition">Fill at least one condition.</string>
+
+    <!-- Message detail -->
+    <string name="detail_to">To: %1$s</string>
+    <plurals name="detail_to_more">
+        <item quantity="one">To: %1$s and %2$d other</item>
+        <item quantity="other">To: %1$s and %2$d others</item>
+    </plurals>
+    <string name="detail_attachments">Attachments</string>
+    <string name="detail_open_failed">Can\'t open this file</string>
+    <string name="detail_empty">(no content)</string>
+
+    <!-- Notifications -->
+    <string name="notify_channel">Important messages</string>
+    <string name="notify_channel_description">New important messages, checked about once an hour</string>
+    <plurals name="notify_new_important">
+        <item quantity="one">%d important message</item>
+        <item quantity="other">%d important messages</item>
+    </plurals>
+</resources>
