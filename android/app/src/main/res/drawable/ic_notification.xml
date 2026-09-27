@@ -1,0 +1,13 @@
+<!-- Status bar icon: the launcher bubble with the funnel cut out. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+    <group android:translateX="2" android:translateY="13">
+        <path
+            android:fillColor="#FFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M154.2,62.5c0-32.8-34-59.4-76-59.4s-76,26.6-76,59.4s34,59.4,76,59.4c6.6,0,13.2-0.7,19.6-2.1l23.1,11.6v-19.8C141.1,100.9,154.2,82.9,154.2,62.5z M46,36 H110 Q114,36 111.5,39.5 L86,70 V92 Q86,94.5 83.8,95.6 L73.2,100.6 Q70,102 70,98.5 V70 L44.5,39.5 Q42,36 46,36 Z" />
+    </group>
+</vector>

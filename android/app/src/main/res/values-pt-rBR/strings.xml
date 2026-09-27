@@ -1,0 +1,185 @@
+<resources>
+    <string name="app_name">ClassApp Triagem</string>
+
+    <!-- Common -->
+    <string name="cancel">Cancelar</string>
+    <string name="save">Salvar</string>
+    <string name="delete">Excluir</string>
+    <string name="back">Voltar</string>
+    <string name="more">Mais</string>
+    <string name="retry">Tentar novamente</string>
+    <string name="log_out">Sair</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Erro do ClassApp</string>
+    <string name="error_invalid_input">Dados inválidos</string>
+    <string name="error_network">Erro de rede. Verifique sua conexão.</string>
+
+    <!-- Login -->
+    <string name="login_subtitle">Entre com sua conta do ClassApp. Apenas o token de acesso é guardado neste aparelho.</string>
+    <string name="login_contact">E-mail ou telefone</string>
+    <string name="login_password">Senha</string>
+    <string name="login_show_password">Mostrar senha</string>
+    <string name="login_hide_password">Ocultar senha</string>
+    <string name="login_sign_in">Entrar</string>
+    <string name="login_session_expired">Sua sessão expirou. Entre novamente.</string>
+    <string name="login_code">Código de verificação</string>
+    <string name="login_verify">Verificar</string>
+    <string name="login_resend">Reenviar código</string>
+    <string name="login_other_account">Usar outra conta</string>
+    <string name="login_code_sent">Um código de verificação foi enviado para %1$s.</string>
+    <string name="login_code_resent">Um novo código foi enviado para %1$s.</string>
+
+    <!-- Inbox picker -->
+    <string name="entities_title">Escolher caixa de entrada</string>
+    <string name="entities_signed_in_as">Conectado como %1$s</string>
+    <string name="entities_disabled">desativado</string>
+    <string name="entities_id">id %1$d</string>
+    <string name="entities_selected">Selecionado</string>
+
+    <!-- Messages -->
+    <string name="messages_title">Mensagens</string>
+    <string name="tab_important">Importantes (%1$d)</string>
+    <string name="tab_routine">Rotina (%1$d)</string>
+    <string name="action_refresh">Atualizar</string>
+    <string name="action_rules">Regras</string>
+    <string name="action_switch_inbox">Trocar caixa de entrada</string>
+    <string name="action_messages_to_scan">Mensagens a carregar: %1$d</string>
+    <string name="action_notify_important">Notificar novas mensagens importantes</string>
+    <string name="action_clear_selection">Limpar seleção</string>
+    <string name="action_select_all">Selecionar todas da aba</string>
+    <string name="action_mark_read">Marcar como lida</string>
+    <string name="action_mark_unread">Marcar como não lida</string>
+    <string name="action_create_rule">Criar regra a partir do remetente/marcador</string>
+    <string name="action_mark_all_read">Marcar todas como lidas</string>
+    <string name="action_delete_all">Excluir todas</string>
+    <string name="dialog_delete_title">Excluir mensagens</string>
+    <string name="dialog_read_title">Marcar como lidas</string>
+    <string name="messages_none_routine">Nenhuma mensagem de rotina.</string>
+    <string name="messages_none_important">Nenhuma mensagem importante.</string>
+    <string name="messages_load_older">Carregar mensagens mais antigas</string>
+    <string name="scan_title">Mensagens a carregar</string>
+    <string name="scan_label">Quantidade de mensagens recentes</string>
+    <string name="row_rule">regra: %1$s</string>
+    <string name="row_read">✓ lida</string>
+    <string name="row_unread">não lida</string>
+    <string name="row_sent">Enviada</string>
+    <string name="row_received">Recebida</string>
+    <string name="row_images">Imagens</string>
+    <string name="row_videos">Vídeos</string>
+    <string name="row_audios">Áudio</string>
+    <string name="row_files">Arquivos</string>
+    <string name="row_surveys">Enquete</string>
+    <string name="row_reports">Relatório</string>
+    <string name="row_forms">Formulário</string>
+    <string name="row_commitments">Evento</string>
+    <string name="row_charges">Cobrança</string>
+    <plurals name="selected_count">
+        <item quantity="one">%d selecionada</item>
+        <item quantity="many">%d selecionadas</item>
+        <item quantity="other">%d selecionadas</item>
+    </plurals>
+    <plurals name="confirm_delete_selected">
+        <item quantity="one">Excluir %d mensagem selecionada?</item>
+        <item quantity="many">Excluir as %d mensagens selecionadas?</item>
+        <item quantity="other">Excluir as %d mensagens selecionadas?</item>
+    </plurals>
+    <plurals name="confirm_read_all_routine">
+        <item quantity="one">Marcar %d mensagem de rotina como lida?</item>
+        <item quantity="many">Marcar todas as %d mensagens de rotina como lidas?</item>
+        <item quantity="other">Marcar todas as %d mensagens de rotina como lidas?</item>
+    </plurals>
+    <plurals name="confirm_delete_all_routine">
+        <item quantity="one">Excluir %d mensagem de rotina?</item>
+        <item quantity="many">Excluir todas as %d mensagens de rotina?</item>
+        <item quantity="other">Excluir todas as %d mensagens de rotina?</item>
+    </plurals>
+    <plurals name="info_deleted">
+        <item quantity="one">%d mensagem excluída</item>
+        <item quantity="many">%d mensagens excluídas</item>
+        <item quantity="other">%d mensagens excluídas</item>
+    </plurals>
+    <plurals name="info_marked_read">
+        <item quantity="one">%d mensagem marcada como lida</item>
+        <item quantity="many">%d mensagens marcadas como lidas</item>
+        <item quantity="other">%d mensagens marcadas como lidas</item>
+    </plurals>
+    <plurals name="info_marked_unread">
+        <item quantity="one">%d mensagem marcada como não lida</item>
+        <item quantity="many">%d mensagens marcadas como não lidas</item>
+        <item quantity="other">%d mensagens marcadas como não lidas</item>
+    </plurals>
+
+    <!-- Rules -->
+    <string name="rules_title">Regras de triagem</string>
+    <string name="rules_help">Regras importantes têm prioridade sobre as de rotina. Mensagens que não correspondem a nenhuma regra são importantes. Numa regra, todos os campos preenchidos precisam corresponder; valores separados por vírgula correspondem a qualquer um.</string>
+    <string name="group_important">Importantes</string>
+    <string name="group_routine">Rotina</string>
+    <string name="rules_add">Adicionar</string>
+    <string name="rules_none">Nenhuma regra.</string>
+    <string name="rules_unnamed">(sem nome)</string>
+    <string name="rules_move_up">Mover para cima</string>
+    <string name="rules_move_down">Mover para baixo</string>
+    <string name="rules_delete">Excluir regra</string>
+    <string name="rules_delete_text">Excluir a regra \"%1$s\"?</string>
+    <string name="rules_export_file">Exportar para arquivo</string>
+    <string name="rules_import_file">Importar de arquivo</string>
+    <string name="rules_share_json">Compartilhar JSON</string>
+    <string name="rules_share_title">Compartilhar regras</string>
+    <string name="rules_copy_json">Copiar JSON</string>
+    <string name="rules_paste_json">Colar JSON</string>
+    <string name="rules_reset_defaults">Restaurar padrões</string>
+    <string name="rules_reset_title">Restaurar regras</string>
+    <string name="rules_reset_text">Substituir todas as regras pelas regras padrão?</string>
+    <string name="rules_reset">Restaurar</string>
+    <string name="rules_exported">Regras exportadas</string>
+    <string name="rules_imported">Regras importadas</string>
+    <string name="rules_copied">Regras copiadas</string>
+    <string name="rules_nothing_to_import">Nada para importar</string>
+    <string name="rules_invalid_json">JSON de regras inválido: %1$s</string>
+    <string name="rules_export_failed">Falha ao exportar: %1$s</string>
+    <string name="rules_import_failed">Falha ao importar: %1$s</string>
+    <string name="cond_label">marcador = %1$s</string>
+    <string name="cond_label_id">id do marcador = %1$s</string>
+    <string name="cond_sender">remetente ~ %1$s</string>
+    <string name="cond_sender_id">id do remetente = %1$s</string>
+    <string name="cond_prefix">começa com %1$s</string>
+    <string name="cond_contains">contém %1$s</string>
+    <string name="cond_and">" E "</string>
+    <string name="cond_none">(sem condições — nunca corresponde)</string>
+
+    <!-- Rule editor -->
+    <string name="rule_new">Nova regra</string>
+    <string name="rule_edit">Editar regra</string>
+    <string name="rule_name">Nome</string>
+    <string name="rule_help">Todos os campos preenchidos precisam corresponder. Separe alternativas com vírgulas. A comparação ignora maiúsculas e acentos.</string>
+    <string name="rule_labels">Marcador é (título exato)</string>
+    <string name="rule_senders">Nome do remetente contém</string>
+    <string name="rule_prefixes">Resumo começa com</string>
+    <string name="rule_contains">Resumo contém</string>
+    <string name="rule_advanced">Avançado</string>
+    <string name="rule_label_ids">IDs de marcadores</string>
+    <string name="rule_sender_ids">IDs de remetentes</string>
+    <string name="rule_error_name">Dê um nome à regra.</string>
+    <string name="rule_error_condition">Preencha pelo menos uma condição.</string>
+
+    <!-- Message detail -->
+    <string name="detail_to">Para: %1$s</string>
+    <plurals name="detail_to_more">
+        <item quantity="one">Para: %1$s e mais %2$d</item>
+        <item quantity="many">Para: %1$s e mais %2$d</item>
+        <item quantity="other">Para: %1$s e mais %2$d</item>
+    </plurals>
+    <string name="detail_attachments">Anexos</string>
+    <string name="detail_open_failed">Não foi possível abrir este arquivo</string>
+    <string name="detail_empty">(sem conteúdo)</string>
+
+    <!-- Notifications -->
+    <string name="notify_channel">Mensagens importantes</string>
+    <string name="notify_channel_description">Novas mensagens importantes, verificadas cerca de uma vez por hora</string>
+    <plurals name="notify_new_important">
+        <item quantity="one">%d mensagem importante</item>
+        <item quantity="many">%d mensagens importantes</item>
+        <item quantity="other">%d mensagens importantes</item>
+    </plurals>
+</resources>
