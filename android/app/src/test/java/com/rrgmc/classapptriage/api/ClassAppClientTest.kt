@@ -267,6 +267,18 @@ class ClassAppClientTest {
     }
 
     @Test
+    fun reportSameForEveryone() = runTest {
+        // Live shape: content and rendered null, entityId null, CHECK values as arrays.
+        enqueue("""{"data":{"node":{"id":5,"message":{"id":42,"subject":"Menu","content":null,"rendered":null,
+            "reports":{"nodes":[{"id":3,"name":"Menu","results":{"nodes":[
+              {"reportFieldId":1,"entityId":null,"name":"Drink","type":"CHECK","value":["Juice"]},
+              {"reportFieldId":2,"entityId":null,"name":"Salad","type":"CHECK","value":["Tomato","Cabbage"]}
+            ]}}]}}}}}""")
+        val r = client().message(42, entityId = 5).reports.single()
+        assertEquals(listOf("Juice", "Tomato, Cabbage"), r.results.map { it.displayValue })
+    }
+
+    @Test
     fun entityMessageFallsBackToPlainQuery() = runTest {
         enqueue("""{"errors":[{"message":"Invalid request"}]}""", code = 400)
         enqueue("""{"data":{"node":{"id":42,"subject":"S","content":"c"}}}""")

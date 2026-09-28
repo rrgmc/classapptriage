@@ -800,7 +800,8 @@ been seen yet.
 | `Message.toEntity` (§5.3, §5.4) | another family's student | For a message sent to many recipients, `toEntity` is **one** recipient, not necessarily the viewer's entity. Show the recipient groups (`tags`, §5.4) or the viewer's own inbox entity instead, with `recipientsCount` for how many received it. |
 | Per-user read state | `folder: UNREAD_BY_NTF` (§6.1) | **Confirmed:** listing `EntityMessagesQuery` with `folder: UNREAD_BY_NTF` returns exactly the messages the official app shows as unread (blue dot) for the logged-in user. A message is unread iff it appears there; paginate it like any listing and collect the ids. |
 | `createMessageStatusInBatch.status` (§5.5) | only `DELETED`, `ARCHIVED` | `READ` / `UNREAD` fail with `Expected type "MessageStatusEnum", found "READ"`. Read/unread use `updateRecipientInBatch` with `READ` / `AS_UNREAD` (validated against the live schema; `UNREAD` is rejected there too). |
-| `MessageDetail.content` (§5.4) | `""` for a report-only message | The official app shows the attached report instead (§5.4.1). `rendered`, `reports` and `Entity.message(id)` pass validation; report `value` shapes are from the web app's code (schema-only). |
+| `MessageDetail.content` / `rendered` (§5.4.1) | both `null` for a report-only message; otherwise `rendered` equals `content` (HTML) | The official app shows the attached report instead. |
+| `ReportResult` (§5.4.1) | `entityId: null`, `type: "CHECK"`, `value: ["…", "…"]` | A report that is the same for every recipient has `null` `entityId`. `CHECK` values arrive as JSON arrays (the web app also accepts a JSON-encoded string). |
 | `Label.color` (§5.2, §5.3) | `"f03e3e"` | Bare 6-digit hex without a leading `#`. Prepend `#` before handing it to color parsers that require it. |
 
 ### 10.2 Undocumented `Message` fields
