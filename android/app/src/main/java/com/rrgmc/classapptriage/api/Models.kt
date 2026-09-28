@@ -6,7 +6,10 @@ import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonDecoder
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
@@ -108,11 +111,42 @@ data class Media(
 @Serializable
 data class Tag(val id: Long = 0, val name: String = "")
 
+/** One answered field of a [Report]. [value] is a string, a JSON array (or its string encoding) or null. */
+@Serializable
+data class ReportResult(
+    val reportFieldId: Long = 0,
+    val entityId: Long? = null,
+    val name: String = "",
+    /** TEXT, SELECT, CHECK, … */
+    val type: String? = null,
+    val value: JsonElement? = null,
+) {
+    /** [value] as display text: arrays are joined with ", ". */
+    val displayValue: String get() = display(value)
+
+    private fun display(e: JsonElement?): String = when (e) {
+        null, JsonNull -> ""
+        is JsonArray -> e.map { display(it) }.filter { it.isNotEmpty() }.joinToString(", ")
+        is JsonPrimitive -> {
+            val s = e.content
+            if (e.isString && s.trimStart().startsWith("[")) {
+                runCatching { Json.parseToJsonElement(s) }.getOrNull()?.let { display(it) } ?: s
+            } else s
+        }
+        else -> e.toString()
+    }
+}
+
+/** A report (field/value card) attached to a message; see docs/API.md §5.4. */
+data class Report(val id: Long, val name: String, val results: List<ReportResult>)
+
 /** The full contents of a single message (MessageQuery, docs/API.md 5.4). */
 data class MessageDetail(
     val id: Long,
     val subject: String?,
     val content: String?,
+    /** Server-rendered HTML body, what the official app shows; may be set when [content] is empty. */
+    val rendered: String? = null,
     val summary: String,
     val statusText: String?,
     val recipientsCount: Int,
@@ -125,6 +159,7 @@ data class MessageDetail(
     val label: Label?,
     val tags: List<Tag>,
     val medias: List<Media>,
+    val reports: List<Report> = emptyList(),
 )
 
 /**

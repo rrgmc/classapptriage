@@ -152,6 +152,21 @@ class ClassAppClientTest {
     }
 
     @Test
+    fun readAndUnreadUseUpdateRecipient() = runTest {
+        repeat(2) { enqueue("""{"data":{"updateRecipientInBatch":{"clientMutationId":null}}}""") }
+        client().setMessagesStatus(5, listOf(1L), MessageStatus.READ)
+        client().setMessagesStatus(5, listOf(2L), MessageStatus.UNREAD)
+        for (expected in listOf("READ", "AS_UNREAD")) {
+            val body = takeBody().second
+            assertEquals("updateRecipientInBatch", body["operationName"]!!.jsonPrimitive.content)
+            val input = body["variables"]!!.jsonObject["input"]!!.jsonObject
+            assertEquals(expected, input["status"]!!.jsonPrimitive.content)
+            assertEquals(5L, input["entityId"]!!.jsonPrimitive.long)
+            assertEquals("true", input["deleteNotification"]!!.jsonPrimitive.content)
+        }
+    }
+
+    @Test
     fun sendCodeSendsOnlyOneContact() = runTest {
         enqueue("""{"data":{"sendCode":{"__typename":"SendCodePayload"}}}""")
         client(token = null).sendCode(Contact.parse("a@b.c"))
@@ -230,6 +245,34 @@ class ClassAppClientTest {
         val body = takeBody().second
         assertEquals("MessageQuery", body["operationName"]!!.jsonPrimitive.content)
         assertEquals(42L, body["variables"]!!.jsonObject["id"]!!.jsonPrimitive.long)
+    }
+
+    @Test
+    fun entityMessageWithRenderedAndReports() = runTest {
+        enqueue("""{"data":{"node":{"id":5,"message":{"id":42,"subject":"Menu","content":"","rendered":"<p>Hi</p>",
+            "reports":{"nodes":[{"id":3,"name":"Menu - Office","results":{"nodes":[
+              {"reportFieldId":1,"entityId":5,"name":"Drink","type":"TEXT","value":"Juice"},
+              {"reportFieldId":2,"entityId":6,"name":"Drink","type":"TEXT","value":"Other kid"},
+              {"reportFieldId":3,"entityId":5,"name":"Sides","type":"CHECK","value":"[\"Rice\",\"Beans\"]"},
+              {"reportFieldId":4,"entityId":5,"name":"Main","type":"SELECT","value":["Chicken"]}
+            ]}}]}}}}}""")
+        val m = client().message(42, entityId = 5)
+        assertEquals("<p>Hi</p>", m.rendered)
+        val r = m.reports.single()
+        assertEquals("Menu - Office", r.name)
+        assertEquals(listOf("Juice", "Rice, Beans", "Chicken"), r.results.map { it.displayValue })
+        val body = takeBody().second
+        assertEquals("EntityMessageQuery", body["operationName"]!!.jsonPrimitive.content)
+        assertEquals(5L, body["variables"]!!.jsonObject["entityId"]!!.jsonPrimitive.long)
+    }
+
+    @Test
+    fun entityMessageFallsBackToPlainQuery() = runTest {
+        enqueue("""{"errors":[{"message":"Invalid request"}]}""", code = 400)
+        enqueue("""{"data":{"node":{"id":42,"subject":"S","content":"c"}}}""")
+        assertEquals("c", client().message(42, entityId = 5).content)
+        assertEquals("EntityMessageQuery", takeBody().second["operationName"]!!.jsonPrimitive.content)
+        assertEquals("MessageQuery", takeBody().second["operationName"]!!.jsonPrimitive.content)
     }
 
     @Test

@@ -224,17 +224,48 @@ class ClassAppClient(
             val label: Label? = null,
             val tags: Nodes<Tag> = Nodes(),
             val medias: Nodes<Media> = Nodes(),
-        )
+            val rendered: String? = null,
+            val reports: Nodes<ReportNode> = Nodes(),
+        ) {
+            fun detail(inboxId: Long) = MessageDetail(
+                id, subject, content, rendered, summary, statusText, recipientsCount, created, sentAt,
+                entity, user, toEntity, label, tags.nodes, medias.nodes,
+                reports.nodes.map { Report(it.id, it.name, it.results.nodes.forInbox(inboxId)) },
+            )
+        }
+
+        @Serializable
+        data class ReportNode(val id: Long = 0, val name: String = "", val results: Nodes<ReportResult> = Nodes())
     }
 
-    /** Fetches the full body and attachments of message [id]. */
-    suspend fun message(id: Long): MessageDetail {
+    @Serializable
+    private data class EntityMessageData(val node: Node? = null) {
+        @Serializable data class Node(val message: MessageData.Node? = null)
+    }
+
+    /**
+     * Fetches the full body, attachments and reports of message [id]. With the
+     * inbox [entityId] it reads the message the way the official web app does
+     * (docs/API.md §5.4); if that is rejected it falls back to the plain query.
+     */
+    suspend fun message(id: Long, entityId: Long = 0): MessageDetail {
+        if (entityId != 0L) {
+            try {
+                val vars = buildJsonObject {
+                    put("entityId", entityId)
+                    put("id", id)
+                }
+                val n = execute("EntityMessageQuery", QUERY_ENTITY_MESSAGE, vars, EntityMessageData.serializer()).node?.message
+                if (n != null) return n.detail(entityId)
+            } catch (e: UnauthorizedException) {
+                throw e
+            } catch (e: ClassAppException) {
+                if (e !is GraphQLException && e !is DecodeException) throw e
+            }
+        }
         val n = execute("MessageQuery", QUERY_MESSAGE, buildJsonObject { put("id", id) }, MessageData.serializer()).node
             ?: throw ClassAppException("message $id not found")
-        return MessageDetail(
-            n.id, n.subject, n.content, n.summary, n.statusText, n.recipientsCount, n.created, n.sentAt,
-            n.entity, n.user, n.toEntity, n.label, n.tags.nodes, n.medias.nodes,
-        )
+        return n.detail(entityId)
     }
 
     // --- Labels -------------------------------------------------------------
@@ -258,8 +289,10 @@ class ClassAppClient(
     // --- Status -------------------------------------------------------------
 
     /**
-     * Applies [status] to [ids] in the inbox of [entityId] via
-     * `createMessageStatusInBatch`, in chunks of [chunkSize]. No-op when empty.
+     * Applies [status] to [ids] in the inbox of [entityId], in chunks of
+     * [chunkSize]. No-op when empty. Read/unread go through
+     * `updateRecipientInBatch` (`READ` / `AS_UNREAD`); delete through
+     * `createMessageStatusInBatch` (`DELETED`), as the web app does (docs/API.md §5.5).
      */
     suspend fun setMessagesStatus(entityId: Long, ids: List<Long>, status: MessageStatus, chunkSize: Int = 50) {
         for (chunk in ids.chunked(chunkSize)) {
@@ -267,10 +300,21 @@ class ClassAppClient(
                 put("input", buildJsonObject {
                     put("entityId", entityId)
                     put("messagesId", buildJsonArray { chunk.forEach { add(kotlinx.serialization.json.JsonPrimitive(it)) } })
-                    put("status", status.name)
+                    when (status) {
+                        MessageStatus.DELETED -> put("status", "DELETED")
+                        MessageStatus.READ, MessageStatus.UNREAD -> {
+                            put("status", if (status == MessageStatus.READ) "READ" else "AS_UNREAD")
+                            put("deleteNotification", true)
+                            put("legacyMode", false)
+                        }
+                    }
                 })
             }
-            execute("createMessageStatusInBatch", MUTATION_CREATE_MESSAGE_STATUS_IN_BATCH, vars, JsonElement.serializer())
+            if (status == MessageStatus.DELETED) {
+                execute("createMessageStatusInBatch", MUTATION_CREATE_MESSAGE_STATUS_IN_BATCH, vars, JsonElement.serializer())
+            } else {
+                execute("updateRecipientInBatch", MUTATION_UPDATE_RECIPIENT_IN_BATCH, vars, JsonElement.serializer())
+            }
         }
     }
 
@@ -379,6 +423,16 @@ class ClassAppClient(
             OkHttpClient.Builder().callTimeout(30, TimeUnit.SECONDS).build()
         }
     }
+}
+
+/**
+ * A report sent to many recipients can carry one result set per recipient
+ * entity: keep those of [inboxId] (plus shared ones, without an entity) when
+ * present, otherwise everything.
+ */
+internal fun List<ReportResult>.forInbox(inboxId: Long): List<ReportResult> {
+    if (inboxId == 0L || none { it.entityId == inboxId }) return this
+    return filter { it.entityId == null || it.entityId == 0L || it.entityId == inboxId }
 }
 
 /** Identifies a user for the login flow. Exactly one of email/phone is set. */

@@ -95,6 +95,48 @@ query MessageQuery(${'$'}id: ID!) {
   }
 }"""
 
+/**
+ * The message as the official web app reads it for a recipient: through the
+ * inbox entity, with the server-rendered HTML body and attached reports
+ * (docs/API.md §5.4). Falls back to [QUERY_MESSAGE] if rejected.
+ */
+internal const val QUERY_ENTITY_MESSAGE = """
+query EntityMessageQuery(${'$'}entityId: ID!, ${'$'}id: ID!) {
+  node(id: ${'$'}entityId) {
+    ... on Entity {
+      id: dbId
+      message(id: ${'$'}id) {
+        id: dbId
+        subject
+        content
+        rendered
+        summary
+        statusText
+        pin
+        public
+        recipientsCount
+        created
+        sentAt
+        entity { id: dbId fullname disabled picture { uri id: dbId key } }
+        user { id: dbId fullname }
+        toEntity { id: dbId fullname status }
+        label { id: dbId title color }
+        tags(limit: 40) { nodes { id: dbId name } }
+        medias { nodes { id: dbId type uri filename key size thumbnail width height } }
+        reports(limit: 40) {
+          nodes {
+            id: dbId
+            name
+            results(orderBy: { column: ID }, limit: 200) {
+              nodes { reportFieldId entityId name type value }
+            }
+          }
+        }
+      }
+    }
+  }
+}"""
+
 internal const val QUERY_ENTITY_LABELS = """
 query EntityLabelsQuery(${'$'}entityId: ID!, ${'$'}limit: Int) {
   node(id: ${'$'}entityId) {
@@ -113,6 +155,13 @@ query EntityLabelsQuery(${'$'}entityId: ID!, ${'$'}limit: Int) {
 internal const val MUTATION_CREATE_MESSAGE_STATUS_IN_BATCH = """
 mutation createMessageStatusInBatch(${'$'}input: CreateMessageStatusInBatchInput!) {
   createMessageStatusInBatch(input: ${'$'}input) {
+    clientMutationId
+  }
+}"""
+
+internal const val MUTATION_UPDATE_RECIPIENT_IN_BATCH = """
+mutation updateRecipientInBatch(${'$'}input: updateRecipientInBatchInput!) {
+  updateRecipientInBatch(input: ${'$'}input) {
     clientMutationId
   }
 }"""

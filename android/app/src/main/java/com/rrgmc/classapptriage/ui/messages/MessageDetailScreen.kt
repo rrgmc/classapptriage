@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MarkEmailRead
 import androidx.compose.material.icons.filled.MarkEmailUnread
@@ -71,6 +72,7 @@ import com.rrgmc.classapptriage.R
 import com.rrgmc.classapptriage.api.Media
 import com.rrgmc.classapptriage.api.MessageDetail
 import com.rrgmc.classapptriage.api.MessageStatus
+import com.rrgmc.classapptriage.api.Report
 import com.rrgmc.classapptriage.api.UnauthorizedException
 import com.rrgmc.classapptriage.ui.appViewModel
 import com.rrgmc.classapptriage.ui.formatElapsed
@@ -88,7 +90,11 @@ data class MessageDetailState(
 )
 
 /** Loads the full message (MessageQuery). Status changes go through the list view model. */
-class MessageDetailViewModel(private val container: AppContainer, private val id: Long) : ViewModel() {
+class MessageDetailViewModel(
+    private val container: AppContainer,
+    private val id: Long,
+    private val entityId: Long,
+) : ViewModel() {
     private val _state = MutableStateFlow(MessageDetailState())
     val state: StateFlow<MessageDetailState> = _state.asStateFlow()
 
@@ -101,7 +107,7 @@ class MessageDetailViewModel(private val container: AppContainer, private val id
         _state.value = _state.value.copy(loading = true, error = null)
         viewModelScope.launch {
             _state.value = try {
-                MessageDetailState(loading = false, detail = client.message(id))
+                MessageDetailState(loading = false, detail = client.message(id, entityId))
             } catch (e: UnauthorizedException) {
                 container.sessionExpired()
                 return@launch
@@ -115,7 +121,7 @@ class MessageDetailViewModel(private val container: AppContainer, private val id
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageDetailScreen(id: Long, listVm: MessagesViewModel, onBack: () -> Unit) {
-    val vm = appViewModel(key = "message-$id") { MessageDetailViewModel(it, id) }
+    val vm = appViewModel(key = "message-$id") { MessageDetailViewModel(it, id, listVm.state.value.entityId) }
     val state by vm.state.collectAsState()
     val list by listVm.state.collectAsState()
     val listed = remember(list) { listVm.find(id) }
@@ -234,18 +240,52 @@ private fun MessageBody(m: MessageDetail, read: Boolean, inboxId: Long, inboxNam
         val title = m.subject?.takeIf { it.isNotBlank() } ?: m.summary
         Text(title, style = MaterialTheme.typography.headlineSmall)
         HorizontalDivider()
-        val content = m.content.orEmpty()
-        SelectionContainer {
-            when {
-                content.isBlank() -> Text(stringResource(R.string.detail_empty), color = muted)
-                looksLikeHtml(content) -> Text(AnnotatedString.fromHtml(content), style = MaterialTheme.typography.bodyLarge)
-                else -> Text(content, style = MaterialTheme.typography.bodyLarge)
+        // `rendered` is what the official app shows; `content` can be empty
+        // (e.g. when the message is only a report).
+        val content = m.rendered?.takeIf { it.isNotBlank() } ?: m.content.orEmpty()
+        val reports = m.reports.filter { it.results.isNotEmpty() }
+        if (content.isNotBlank() || (reports.isEmpty() && m.medias.isEmpty())) {
+            SelectionContainer {
+                when {
+                    content.isBlank() -> Text(stringResource(R.string.detail_empty), color = muted)
+                    looksLikeHtml(content) -> Text(AnnotatedString.fromHtml(content), style = MaterialTheme.typography.bodyLarge)
+                    else -> Text(content, style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
+        reports.forEach { ReportCard(it) }
         if (m.medias.isNotEmpty()) {
             HorizontalDivider()
             Text(stringResource(R.string.detail_attachments), style = MaterialTheme.typography.titleSmall)
             m.medias.forEach { MediaItem(it) }
+        }
+    }
+}
+
+/** A report as a card of field/value rows, like the official app. */
+@Composable
+private fun ReportCard(report: Report) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        SelectionContainer {
+            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.AutoMirrored.Outlined.List, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(8.dp))
+                    Text(report.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                }
+                report.results.forEachIndexed { i, r ->
+                    if (i > 0) HorizontalDivider()
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(r.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+                        Spacer(Modifier.width(12.dp))
+                        Text(r.displayValue, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
         }
     }
 }

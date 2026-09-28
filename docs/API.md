@@ -428,9 +428,75 @@ Variables:
 Returns `data.node` as a `MessageDetail` (§7), with `tags.nodes` and
 `medias.nodes` flattened.
 
+#### 5.4.1 Recipient view (what the web app uses)
+
+The web app reads a received message **through the inbox entity**, and shows
+the server-rendered HTML body (`rendered`) and any attached **reports**. Use
+this form when the inbox entity is known; fall back to the form above if it is
+rejected.
+
+```graphql
+query EntityMessageQuery($entityId: ID!, $id: ID!) {
+  node(id: $entityId) {
+    ... on Entity {
+      id: dbId
+      message(id: $id) {
+        id: dbId
+        subject
+        content
+        rendered
+        summary
+        # … same metadata, tags and medias fields as above …
+        reports(limit: 40) {
+          nodes {
+            id: dbId
+            name
+            results(orderBy: { column: ID }, limit: 200) {
+              nodes { reportFieldId entityId name type value }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Returns `data.node.message` as a `MessageDetail`.
+
+- Show `rendered` (HTML) when non-empty, else `content`. A message whose body
+  is only a report (e.g. a daily menu) has an empty `content`.
+- Each report is a card of `name` / `value` rows (`Report`, §7). A report sent
+  to many recipients can hold one set of results per recipient `entityId`:
+  keep those of the inbox entity when present.
+
 ### 5.5 Change message status (read / unread / deleted)
 
-Reading, un-reading, and deleting all go through one batch mutation:
+Read and unread go through `updateRecipientInBatch`:
+
+```graphql
+mutation updateRecipientInBatch($input: updateRecipientInBatchInput!) {
+  updateRecipientInBatch(input: $input) {
+    clientMutationId
+  }
+}
+```
+
+`updateRecipientInBatchInput` fields (as sent by the web app):
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `entityId` | Int | The inbox/entity the messages belong to. |
+| `messagesId` | [Int] | Message ids to update. |
+| `status` | `UpdateRecipientStatus` | `READ`, `AS_UNREAD` (also `ARCHIVED`, `UNARCHIVED`), §6.2. |
+| `deleteNotification` | Boolean | The web app sends `true`. |
+| `legacyMode` | Boolean | The web app sends `false`. |
+
+```json
+{ "input": { "entityId": 123456789, "messagesId": [987654321], "status": "READ", "deleteNotification": true, "legacyMode": false } }
+```
+
+Deleting goes through `createMessageStatusInBatch`:
 
 ```graphql
 mutation createMessageStatusInBatch($input: CreateMessageStatusInBatchInput!) {
@@ -446,14 +512,15 @@ mutation createMessageStatusInBatch($input: CreateMessageStatusInBatchInput!) {
 | --- | --- | --- |
 | `entityId` | Int | The inbox/entity the messages belong to. |
 | `messagesId` | [Int] | Message ids to update. |
-| `status` | String (enum) | `READ`, `UNREAD`, or `DELETED` (§6.2). |
+| `status` | `MessageStatusEnum` | `DELETED` (or `ARCHIVED`), §6.2. **Not** `READ`/`UNREAD`: the server rejects them (§10.1). |
 
 Deleting a message is `status = DELETED`. There is no separate delete mutation.
+The web app undoes it with `deleteMessageStatusInBatch` (`recoverForMe`).
 
 Example variables:
 
 ```json
-{ "input": { "entityId": 123456789, "messagesId": [987654321], "status": "READ" } }
+{ "input": { "entityId": 123456789, "messagesId": [987654321], "status": "DELETED" } }
 ```
 
 ---
@@ -470,13 +537,22 @@ Example variables:
 | `RECEIVED` | Received. |
 | `DELETED` | Deleted. |
 
-### 6.2 Message status (`createMessageStatusInBatch`)
+### 6.2 Message status
+
+`UpdateRecipientStatus` (`updateRecipientInBatch.status`):
 
 | Value | Meaning |
 | --- | --- |
 | `READ` | Mark read. |
-| `UNREAD` | Mark unread. |
+| `AS_UNREAD` | Mark unread. |
+| `ARCHIVED` / `UNARCHIVED` | Archive / move back to the inbox. |
+
+`MessageStatusEnum` (`createMessageStatusInBatch.status`):
+
+| Value | Meaning |
+| --- | --- |
 | `DELETED` | Delete for the current user. |
+| `ARCHIVED` | Accepted by the schema; the web app does not use it here. |
 
 ### 6.3 Media type (`medias.nodes[].type`)
 
@@ -563,8 +639,29 @@ All of `Message`'s identity/metadata fields plus:
 | `medias` | list of Media (connection `nodes`) |
 | `links` | list |
 
+| `rendered` | string — server-rendered HTML body (§5.4.1); what the web app displays |
+| `reports` | list of Report (connection `nodes`, §5.4.1) |
+
 (`MessageDetail` does not include the per-type counts; use `medias` for
 attachments.)
+
+### Report
+
+| Field | Type |
+| --- | --- |
+| `id` | int |
+| `name` | string — card title |
+| `results` | list of ReportResult (connection `nodes`) |
+
+### ReportResult
+
+| Field | Type |
+| --- | --- |
+| `reportFieldId` | int |
+| `entityId` | int — recipient entity the answer belongs to |
+| `name` | string — field label |
+| `type` | string — `TEXT`, `SELECT`, `CHECK`, … |
+| `value` | string, or a list of strings for `SELECT`/`CHECK`; the list may also arrive JSON-encoded in a string (the web app handles both) |
 
 ### Entity
 
@@ -662,8 +759,8 @@ attachments.)
 
 5. **Read a message:** `MessageQuery` with the message `id`.
 
-6. **Mark read:** `createMessageStatusInBatch` with
-   `{ entityId, messagesId: [id], status: "READ" }`.
+6. **Mark read:** `updateRecipientInBatch` with
+   `{ entityId, messagesId: [id], status: "READ", deleteNotification: true, legacyMode: false }`.
 
 ---
 
@@ -702,6 +799,8 @@ been seen yet.
 | `Message.statuses` (§10.2) | `{"nodes": []}` | Empty on received messages, whether read or not. |
 | `Message.toEntity` (§5.3, §5.4) | another family's student | For a message sent to many recipients, `toEntity` is **one** recipient, not necessarily the viewer's entity. Show the recipient groups (`tags`, §5.4) or the viewer's own inbox entity instead, with `recipientsCount` for how many received it. |
 | Per-user read state | `folder: UNREAD_BY_NTF` (§6.1) | **Confirmed:** listing `EntityMessagesQuery` with `folder: UNREAD_BY_NTF` returns exactly the messages the official app shows as unread (blue dot) for the logged-in user. A message is unread iff it appears there; paginate it like any listing and collect the ids. |
+| `createMessageStatusInBatch.status` (§5.5) | only `DELETED`, `ARCHIVED` | `READ` / `UNREAD` fail with `Expected type "MessageStatusEnum", found "READ"`. Read/unread use `updateRecipientInBatch` with `READ` / `AS_UNREAD` (validated against the live schema; `UNREAD` is rejected there too). |
+| `MessageDetail.content` (§5.4) | `""` for a report-only message | The official app shows the attached report instead (§5.4.1). `rendered`, `reports` and `Entity.message(id)` pass validation; report `value` shapes are from the web app's code (schema-only). |
 | `Label.color` (§5.2, §5.3) | `"f03e3e"` | Bare 6-digit hex without a leading `#`. Prepend `#` before handing it to color parsers that require it. |
 
 ### 10.2 Undocumented `Message` fields
