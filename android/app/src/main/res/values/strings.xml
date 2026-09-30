@@ -165,6 +165,8 @@
     <string name="detail_attachments">Attachments</string>
     <string name="detail_open_failed">Can\'t open this file</string>
     <string name="detail_empty">(no content)</string>
+    <string name="detail_unsupported_title">Unsupported content</string>
+    <string name="detail_unsupported_body">Not supported in this app. Open the message in the ClassApp app to see it.</string>
 
     <!-- Notifications -->
     <string name="notify_channel">Important messages</string>

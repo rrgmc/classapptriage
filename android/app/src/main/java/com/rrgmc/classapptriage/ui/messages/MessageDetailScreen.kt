@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.MarkEmailRead
 import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.outlined.AttachFile
 import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Mic
 import androidx.compose.material.icons.outlined.Videocam
 import androidx.compose.material3.AlertDialog
@@ -184,7 +185,13 @@ fun MessageDetailScreen(id: Long, listVm: MessagesViewModel, onBack: () -> Unit)
                     Spacer(Modifier.size(12.dp))
                     Button(onClick = vm::load) { Text(stringResource(R.string.retry)) }
                 }
-                else -> MessageBody(detail, read, inboxId = list.entityId, inboxName = list.entityName)
+                else -> MessageBody(
+                    detail,
+                    read,
+                    inboxId = list.entityId,
+                    inboxName = list.entityName,
+                    unsupported = unsupportedContent(listed?.message),
+                )
             }
         }
     }
@@ -206,7 +213,13 @@ fun MessageDetailScreen(id: Long, listVm: MessagesViewModel, onBack: () -> Unit)
 }
 
 @Composable
-private fun MessageBody(m: MessageDetail, read: Boolean, inboxId: Long, inboxName: String) {
+private fun MessageBody(
+    m: MessageDetail,
+    read: Boolean,
+    inboxId: Long,
+    inboxName: String,
+    unsupported: List<UnsupportedContent>,
+) {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         Modifier
@@ -242,18 +255,22 @@ private fun MessageBody(m: MessageDetail, read: Boolean, inboxId: Long, inboxNam
         HorizontalDivider()
         // `rendered` is what the official app shows; `content` can be empty
         // (e.g. when the message is only a report).
-        val content = m.rendered?.takeIf { it.isNotBlank() } ?: m.content.orEmpty()
+        val raw = m.rendered?.takeIf { it.isNotBlank() } ?: m.content.orEmpty()
+        val html = remember(raw) { if (looksLikeHtml(raw)) AnnotatedString.fromHtml(raw) else AnnotatedString(raw) }
+        // Embedded objects (e.g. a charge or poll widget) can't be drawn and
+        // would show as an "OBJ" box: drop them and explain below instead.
+        val content = remember(html) { html.withoutObjects() }
+        val hasObjects = content.length != html.length
         val reports = m.reports.filter { it.results.isNotEmpty() }
-        if (content.isNotBlank() || (reports.isEmpty() && m.medias.isEmpty())) {
+        val notices = unsupported.ifEmpty { if (hasObjects) listOf(null) else emptyList() }
+        if (content.isNotBlank() || (reports.isEmpty() && m.medias.isEmpty() && notices.isEmpty())) {
             SelectionContainer {
-                when {
-                    content.isBlank() -> Text(stringResource(R.string.detail_empty), color = muted)
-                    looksLikeHtml(content) -> Text(AnnotatedString.fromHtml(content), style = MaterialTheme.typography.bodyLarge)
-                    else -> Text(content, style = MaterialTheme.typography.bodyLarge)
-                }
+                if (content.isBlank()) Text(stringResource(R.string.detail_empty), color = muted)
+                else Text(content, style = MaterialTheme.typography.bodyLarge)
             }
         }
         reports.forEach { ReportCard(it) }
+        notices.forEach { UnsupportedCard(it) }
         if (m.medias.isNotEmpty()) {
             HorizontalDivider()
             Text(stringResource(R.string.detail_attachments), style = MaterialTheme.typography.titleSmall)
@@ -285,6 +302,33 @@ private fun ReportCard(report: Report) {
                         Text(r.displayValue, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
+            }
+        }
+    }
+}
+
+/** An item this app can't show ([kind] null when unknown), pointing to the official app. */
+@Composable
+private fun UnsupportedCard(kind: UnsupportedContent?) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(kind?.icon ?: Icons.Outlined.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(kind?.label ?: R.string.detail_unsupported_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+                Text(
+                    stringResource(R.string.detail_unsupported_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
