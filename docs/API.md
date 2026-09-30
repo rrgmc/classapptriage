@@ -469,6 +469,11 @@ Returns `data.node.message` as a `MessageDetail`.
 - Each report is a card of `name` / `value` rows (`Report`, §7). A report sent
   to many recipients can hold one set of results per recipient `entityId`:
   keep those of the inbox entity when present.
+- Polls, forms, events and charges (payments) attached to a message are not
+  part of this query. The list's counts (§10.2) tell which ones a message
+  has; apps that don't support them should say so and point to the official
+  app. An HTML-to-text conversion may turn embedded objects in `rendered`
+  into U+FFFC (drawn as an "OBJ" box); drop those characters.
 
 ### 5.5 Change message status (read / unread / deleted)
 
