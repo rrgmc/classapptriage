@@ -365,8 +365,10 @@ private fun looksLikeHtml(s: String) = Regex("<(p|br|div|span|a|b|i|strong|em|ul
 private fun MediaItem(media: Media) {
     val context = LocalContext.current
     val failed = stringResource(R.string.detail_open_failed)
+    // Plain `uri` of an image is a low-res rendition; show and open the one the web app uses.
+    val imageUri = media.original?.takeIf { it.isNotBlank() } ?: media.uri
     val open: () -> Unit = {
-        val uri = media.uri
+        val uri = if (media.type == "IMAGE") imageUri else media.uri
         try {
             if (uri.isNullOrBlank()) throw ActivityNotFoundException()
             context.startActivity(Intent(Intent.ACTION_VIEW, uri.toUri()))
@@ -375,9 +377,8 @@ private fun MediaItem(media: Media) {
         }
     }
     if (media.type == "IMAGE" && !media.uri.isNullOrBlank()) {
-        // Plain `uri` renders blurry inline; show the rendition the web app uses.
         AsyncImage(
-            model = media.original?.takeIf { it.isNotBlank() } ?: media.uri,
+            model = imageUri,
             contentDescription = media.filename,
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
