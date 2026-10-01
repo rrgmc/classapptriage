@@ -402,12 +402,17 @@ class ClassAppClient(
     companion object {
         const val FOLDER_UNREAD = "UNREAD_BY_NTF"
         const val DEFAULT_ENDPOINT = "https://web.classapp.com.br/graphql"
+        const val WEB_APP_URL = "https://classapp.com.br"
         const val DEFAULT_CLIENT_ID = "ZmYyYWM3M2JmYjkxY2IwZWJhNzlhZjcw"
         const val DEFAULT_LOCALE = "pt"
         /** Minutes; -180 == UTC-3 (America/Sao_Paulo), as sent by the web client. */
         const val DEFAULT_TZ_OFFSET = -180
         private const val USER_AGENT = "classapptriage-android/1.0"
         private val JSON_MEDIA = "application/json".toMediaType()
+
+        /** The message's page in the ClassApp web app, as seen from inbox [entityId]. */
+        fun messageWebUrl(entityId: Long, messageId: Long): String =
+            "$WEB_APP_URL/entities/$entityId/messages/$messageId"
 
         /** Whether the server accepts [QUERY_ENTITY_MESSAGES_RICH]; shared by all clients. */
         @Volatile

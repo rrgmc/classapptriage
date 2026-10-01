@@ -412,7 +412,7 @@ query MessageQuery($id: ID!) {
       toEntity { id: dbId fullname status }
       label { id: dbId title color }
       tags { nodes { id: dbId name } }
-      medias { nodes { id: dbId type uri filename key size thumbnail width height } }
+      medias { nodes { id: dbId type uri original: uri(size: "w1280") filename key size thumbnail width height } }
       links
     }
   }
@@ -713,7 +713,8 @@ attachments.)
 | --- | --- |
 | `id` | int |
 | `type` | MediaType (§6.3) |
-| `uri` | string |
+| `uri` | string — the full file; takes an optional `size` rendition argument (§10.4) |
+| `original` | alias of `uri(size: "w1280")`: the 1280px-wide image the web app displays (§10.4) |
 | `filename` | string |
 | `key` | string |
 | `size` | int (bytes) |
@@ -858,6 +859,22 @@ can be checked without a token by querying `node(id: 1) { ... on Message
 
 Object/connection fields need a sub-selection (e.g. `surveys { __typename }`)
 or they fail validation.
+
+### 10.4 Media renditions and web links
+
+`Media.uri` and `Media.thumbnail` take an optional `size: String` argument
+that selects a resized rendition (schema: a string is accepted, an int is
+rejected with `Expected type "String"`). The web client never displays plain
+`uri` for images: it shows `uri(size: "w1280")` (aliased `original`) inline
+and keeps plain `uri` (aliased `fullUri`) for downloads. Other values it
+sends: `uri`: `w640`, `w360`, `w1240`, `s70`; `thumbnail`: `w320`, `w480`.
+Live: plain `uri` shown inline in the Android app came out far blurrier
+than the same image in the official app (one image message). Apps should
+display `original` and open plain `uri` when tapped.
+
+A message's page in the web app (read from the web client's routes, not yet
+live-verified) is `https://classapp.com.br/entities/{entityId}/messages/{messageId}`,
+where `entityId` is the inbox entity reading it and both ids are `dbId`s.
 
 ---
 

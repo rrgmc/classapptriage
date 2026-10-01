@@ -22,6 +22,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MarkEmailRead
 import androidx.compose.material.icons.filled.MarkEmailUnread
@@ -70,6 +71,7 @@ import androidx.lifecycle.viewModelScope
 import coil3.compose.AsyncImage
 import com.rrgmc.classapptriage.AppContainer
 import com.rrgmc.classapptriage.R
+import com.rrgmc.classapptriage.api.ClassAppClient
 import com.rrgmc.classapptriage.api.Media
 import com.rrgmc.classapptriage.api.MessageDetail
 import com.rrgmc.classapptriage.api.MessageStatus
@@ -276,6 +278,28 @@ private fun MessageBody(
             Text(stringResource(R.string.detail_attachments), style = MaterialTheme.typography.titleSmall)
             m.medias.forEach { MediaItem(it) }
         }
+        if (inboxId != 0L) {
+            HorizontalDivider()
+            OpenOnWeb(ClassAppClient.messageWebUrl(inboxId, m.id))
+        }
+    }
+}
+
+/** Opens the message in the ClassApp web app (or the official app, if it handles the link). */
+@Composable
+private fun OpenOnWeb(url: String) {
+    val context = LocalContext.current
+    val failed = stringResource(R.string.detail_open_failed)
+    TextButton(onClick = {
+        try {
+            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context, failed, Toast.LENGTH_SHORT).show()
+        }
+    }) {
+        Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(stringResource(R.string.detail_open_web))
     }
 }
 
@@ -351,8 +375,9 @@ private fun MediaItem(media: Media) {
         }
     }
     if (media.type == "IMAGE" && !media.uri.isNullOrBlank()) {
+        // Plain `uri` renders blurry inline; show the rendition the web app uses.
         AsyncImage(
-            model = media.uri,
+            model = media.original?.takeIf { it.isNotBlank() } ?: media.uri,
             contentDescription = media.filename,
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
