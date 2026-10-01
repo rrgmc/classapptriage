@@ -99,9 +99,9 @@ data class Media(
     val id: Long = 0,
     /** FILE, IMAGE, VIDEO or AUDIO. */
     val type: String? = null,
-    /** The full-size file; what tapping an attachment opens. */
+    /** The file; for images, a low-res rendition (docs/API.md §10.4). */
     val uri: String? = null,
-    /** `uri(size: "w1280")`: the 1280px-wide rendition the web app displays (images only). */
+    /** `uri(size: "w1280")`: the 1280px-wide image the web app shows; shown and opened instead of [uri]. */
     val original: String? = null,
     val filename: String? = null,
     val key: String? = null,

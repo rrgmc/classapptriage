@@ -713,7 +713,7 @@ attachments.)
 | --- | --- |
 | `id` | int |
 | `type` | MediaType (§6.3) |
-| `uri` | string — the full file; takes an optional `size` rendition argument (§10.4) |
+| `uri` | string — the file; for images a low-res rendition. Takes an optional `size` argument (§10.4) |
 | `original` | alias of `uri(size: "w1280")`: the 1280px-wide image the web app displays (§10.4) |
 | `filename` | string |
 | `key` | string |
@@ -865,12 +865,16 @@ or they fail validation.
 `Media.uri` and `Media.thumbnail` take an optional `size: String` argument
 that selects a resized rendition (schema: a string is accepted, an int is
 rejected with `Expected type "String"`). The web client never displays plain
-`uri` for images: it shows `uri(size: "w1280")` (aliased `original`) inline
-and keeps plain `uri` (aliased `fullUri`) for downloads. Other values it
-sends: `uri`: `w640`, `w360`, `w1240`, `s70`; `thumbnail`: `w320`, `w480`.
-Live: plain `uri` shown inline in the Android app came out far blurrier
-than the same image in the official app (one image message). Apps should
-display `original` and open plain `uri` when tapped.
+`uri` for images: it shows `uri(size: "w1280")` (aliased `original`). Other
+values it sends: `uri`: `w640`, `w360`, `w1240`, `s70`; `thumbnail`: `w320`,
+`w480`.
+
+Live (one image message): for an `IMAGE`, plain `uri` is a **low-res**
+rendition, far blurrier than in the official app, both shown inline and
+opened in an external viewer; `original` is sharp. Despite the web client
+aliasing plain `uri` as `fullUri`, it is not the full-size file for images.
+Apps should both display and open `original` for images, falling back to
+`uri`. Non-image types keep plain `uri`.
 
 A message's page in the web app (read from the web client's routes, not yet
 live-verified) is `https://classapp.com.br/entities/{entityId}/messages/{messageId}`,
