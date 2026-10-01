@@ -172,6 +172,7 @@
     </plurals>
     <string name="detail_attachments">Anexos</string>
     <string name="detail_open_failed">Não foi possível abrir este arquivo</string>
+    <string name="detail_open_web">Abrir no ClassApp web</string>
     <string name="detail_empty">(sem conteúdo)</string>
     <string name="detail_unsupported_title">Conteúdo não suportado</string>
     <string name="detail_unsupported_body">Não é suportado neste app. Abra a mensagem no app ClassApp para ver.</string>

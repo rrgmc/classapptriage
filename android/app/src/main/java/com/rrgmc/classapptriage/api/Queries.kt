@@ -89,7 +89,7 @@ query MessageQuery(${'$'}id: ID!) {
       toEntity { id: dbId fullname status }
       label { id: dbId title color }
       tags { nodes { id: dbId name } }
-      medias { nodes { id: dbId type uri filename key size thumbnail width height } }
+      medias { nodes { id: dbId type uri original: uri(size: "w1280") filename key size thumbnail width height } }
       links
     }
   }
@@ -122,7 +122,7 @@ query EntityMessageQuery(${'$'}entityId: ID!, ${'$'}id: ID!) {
         toEntity { id: dbId fullname status }
         label { id: dbId title color }
         tags(limit: 40) { nodes { id: dbId name } }
-        medias { nodes { id: dbId type uri filename key size thumbnail width height } }
+        medias { nodes { id: dbId type uri original: uri(size: "w1280") filename key size thumbnail width height } }
         reports(limit: 40) {
           nodes {
             id: dbId

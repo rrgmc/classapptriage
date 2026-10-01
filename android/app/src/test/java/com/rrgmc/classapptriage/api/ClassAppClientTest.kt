@@ -233,15 +233,21 @@ class ClassAppClientTest {
     }
 
     @Test
+    fun messageWebUrl() {
+        assertEquals("https://classapp.com.br/entities/7/messages/42", ClassAppClient.messageWebUrl(7, 42))
+    }
+
+    @Test
     fun messageDetail() = runTest {
         enqueue("""{"data":{"node":{"id":42,"subject":"Passeio","content":"<p>Oi</p>","summary":"Passeio",
             "entity":{"id":7,"fullname":"Escola"},"tags":{"nodes":[{"id":1,"name":"4B"}]},
-            "medias":{"nodes":[{"id":9,"type":"IMAGE","uri":"https://x/y.jpg","filename":"y.jpg","size":1234}]},"links":[]}}}""")
+            "medias":{"nodes":[{"id":9,"type":"IMAGE","uri":"https://x/y.jpg","original":"https://x/y-w1280.jpg","filename":"y.jpg","size":1234}]},"links":[]}}}""")
         val m = client().message(42)
         assertEquals("Passeio", m.subject)
         assertEquals("Escola", m.entity?.fullname)
         assertEquals("4B", m.tags.single().name)
         assertEquals("IMAGE", m.medias.single().type)
+        assertEquals("https://x/y-w1280.jpg", m.medias.single().original)
         val body = takeBody().second
         assertEquals("MessageQuery", body["operationName"]!!.jsonPrimitive.content)
         assertEquals(42L, body["variables"]!!.jsonObject["id"]!!.jsonPrimitive.long)
