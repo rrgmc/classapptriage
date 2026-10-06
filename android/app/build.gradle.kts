@@ -23,8 +23,8 @@ android {
         applicationId = "com.rrgmc.classapptriage"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.3.3"
+        versionCode = 8
+        versionName = "0.4.0"
     }
 
     signingConfigs {
