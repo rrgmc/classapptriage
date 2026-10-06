@@ -107,6 +107,7 @@ object ImportantNotifier {
 
     private fun builder(context: Context, intent: PendingIntent) = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_notification)
+        .setColor(ContextCompat.getColor(context, R.color.notification_accent))
         .setGroup(GROUP)
         .setContentIntent(intent)
         .setAutoCancel(true)
