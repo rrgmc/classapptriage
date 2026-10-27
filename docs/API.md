@@ -954,8 +954,7 @@ where `entityId` is the inbox entity reading it and both ids are `dbId`s.
 
 | Item | Evidence | Notes |
 | --- | --- | --- |
-| `Entity.moments(limit, offset, search, orderBy)` with the selection of §5.6 | schema | Passes validation with `orderBy: [{column: CREATED, direction: DESC}]`. No moment has been seen in a real response yet, so value formats (for example `Message.type` of a moment, or video `mimetype`) are unconfirmed. |
-| `Media.mimetype`, `origName`, `thumbnail`, `width`, `height` on moment medias | schema | As above. |
+| `Entity.moments(limit, offset, search, orderBy)` with the selection of §5.6 | live | Returns the feed newest first, pages with offset, and gives the like count and HTML captions. Images display at `uri(size: "w1280")` with usable `width`/`height`. A video moment has not been seen yet, so the video `mimetype` and `thumbnail` are unconfirmed. |
 | `Organization.features { moments }` | schema | The web app's feature flag for the feed. |
 | `createReaction` / `deleteReaction` (§5.6) | web client only | Input shapes copied from the web client; not probed. |
 
