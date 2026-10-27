@@ -43,6 +43,12 @@
     <string name="tab_routine">Rotina (%1$d)</string>
     <string name="action_refresh">Atualizar</string>
     <string name="action_rules">Regras</string>
+    <string name="action_moments">Momentos</string>
+    <string name="moments_title">Momentos</string>
+    <string name="moments_none">Nenhum momento ainda.</string>
+    <string name="moments_like">Curtir</string>
+    <string name="moments_unlike">Descurtir</string>
+    <string name="moments_play_video">Reproduzir vídeo</string>
     <string name="action_switch_inbox">Trocar caixa de entrada</string>
     <string name="action_messages_to_scan">Mensagens a carregar: %1$d</string>
     <string name="action_notify_important">Notificar novas mensagens importantes</string>
@@ -184,5 +190,10 @@
         <item quantity="one">%d mensagem importante</item>
         <item quantity="many">%d mensagens importantes</item>
         <item quantity="other">%d mensagens importantes</item>
+    </plurals>
+    <plurals name="moments_likes">
+        <item quantity="one">%d curtida</item>
+        <item quantity="many">%d curtidas</item>
+        <item quantity="other">%d curtidas</item>
     </plurals>
 </resources>

@@ -38,6 +38,11 @@ Keep the code and the specs in sync.
   links, attachments, images inline). Opening it marks it read; the top bar
   can mark it unread again (it stays unread while the screen is open) or
   delete it.
+- **Moments**: the school's photo and video feed, opened from the messages
+  screen's top bar. Photos show inline (swipe when a moment has several);
+  videos and full-size photos open in an external app. Moments can be liked
+  and unliked. Browsing the feed does not mark moments read, unlike the web
+  app.
 - **Actions**: on the Routine tab, *Mark all read* and *Delete all* (with
   confirmation). Long-press any message to multi-select, then mark read,
   mark unread, delete, or create a rule from its sender/label.

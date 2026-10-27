@@ -43,6 +43,12 @@
     <string name="tab_routine">Routine (%1$d)</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_rules">Rules</string>
+    <string name="action_moments">Moments</string>
+    <string name="moments_title">Moments</string>
+    <string name="moments_none">No moments yet.</string>
+    <string name="moments_like">Like</string>
+    <string name="moments_unlike">Unlike</string>
+    <string name="moments_play_video">Play video</string>
     <string name="action_switch_inbox">Switch inbox</string>
     <string name="action_messages_to_scan">Messages to scan: %1$d</string>
     <string name="action_notify_important">Notify new important messages</string>
@@ -175,5 +181,9 @@
     <plurals name="notify_new_important">
         <item quantity="one">%d important message</item>
         <item quantity="other">%d important messages</item>
+    </plurals>
+    <plurals name="moments_likes">
+        <item quantity="one">%d like</item>
+        <item quantity="other">%d likes</item>
     </plurals>
 </resources>

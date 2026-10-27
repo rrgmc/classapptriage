@@ -22,6 +22,7 @@ import com.rrgmc.classapptriage.ui.login.LoginScreen
 import com.rrgmc.classapptriage.ui.messages.MessageDetailScreen
 import com.rrgmc.classapptriage.ui.messages.MessagesScreen
 import com.rrgmc.classapptriage.ui.messages.MessagesViewModel
+import com.rrgmc.classapptriage.ui.moments.MomentsScreen
 import com.rrgmc.classapptriage.ui.rules.RuleDraft
 import com.rrgmc.classapptriage.ui.rules.RuleEditScreen
 import com.rrgmc.classapptriage.ui.rules.RulesScreen
@@ -68,6 +69,7 @@ private object Routes {
     const val ENTITIES = "entities"
     const val MESSAGES = "messages"
     const val RULES = "rules"
+    const val MOMENTS = "moments"
     const val MESSAGE = "message/{id}"
 
     fun message(id: Long) = "message/$id"
@@ -111,6 +113,7 @@ private fun MainNav(openMessage: MutableStateFlow<Long?>) {
             MessagesScreen(
                 onSwitchInbox = { nav.navigate(Routes.ENTITIES) },
                 onRules = { nav.navigate(Routes.RULES) },
+                onMoments = { nav.navigate(Routes.MOMENTS) },
                 onCreateRule = { nav.navigate(Routes.ruleEdit(it)) },
                 onOpen = { nav.navigate(Routes.message(it)) },
             )
@@ -124,6 +127,9 @@ private fun MainNav(openMessage: MutableStateFlow<Long?>) {
                 // Also called after an async delete: only pop while this screen is on top.
                 onBack = { if (nav.currentBackStackEntry == entry) nav.popBackStack() },
             )
+        }
+        composable(Routes.MOMENTS) {
+            MomentsScreen(onBack = { nav.popBackStack() })
         }
         composable(Routes.RULES) {
             RulesScreen(
