@@ -528,6 +528,76 @@ Example variables:
 { "input": { "entityId": 123456789, "messagesId": [987654321], "status": "DELETED" } }
 ```
 
+### 5.6 Moments (photo feed)
+
+Moments are the school's photo and video feed. Each moment is a `Message`
+(§7) read through the inbox entity's `moments` connection, not its
+`messages`. The web app shows the feed at
+`https://classapp.com.br/entities/{entityId}/moments` and only when
+`organization.features.moments` is true (schema-only, §10.3).
+
+```graphql
+query EntityMomentsQuery($entityId: ID!, $limit: Int, $offset: Int, $search: String, $orderBy: [EntityMomentsOrder]) {
+  node(id: $entityId) {
+    ... on Entity {
+      id: dbId
+      moments(limit: $limit, offset: $offset, search: $search, orderBy: $orderBy) {
+        nodes {
+          id: dbId
+          created
+          content
+          type
+          entity { id: dbId fullname disabled picture { uri id: dbId key } }
+          reaction(entityId: $entityId) { type }
+          reactions { totalCount }
+          medias { nodes { id: dbId mimetype uri original: uri(size: "w1280") thumbnail origName width height } }
+        }
+        pageInfo { hasPreviousPage hasNextPage }
+      }
+    }
+  }
+}
+```
+
+| Argument | Notes |
+| --- | --- |
+| `limit`, `offset` | Offset pagination (§4.2). The web app pages by 40. |
+| `orderBy` | The web app sends `{ "column": "CREATED", "direction": "DESC" }` (newest first). |
+| `search` | Filters by hashtag; `""` for all. |
+| `deleteNotifications`, `updateStatus`, `updateAccessed` | Also accepted. The web app sends `true`, `READ`, `true` for the viewer's own entities, so opening the feed marks the listed moments read and clears their notifications. Omit them to read the feed without side effects. |
+
+Per moment:
+
+| Field | Notes |
+| --- | --- |
+| `content` | The caption, HTML like a message body. |
+| `entity` | The author. |
+| `reaction(entityId)` | The inbox entity's own reaction, or `null`. A non-null `type` means it liked the moment. |
+| `reactions { totalCount }` | Number of likes. `reactions(limit, offset) { nodes { created user { fullname } entity { … } } }` lists who liked it. |
+| `medias` | Photos and videos. Unlike message attachments (§5.4), the web app selects `mimetype` and `origName` here, not `type` and `filename`. Images are shown at `uri(size: "w1280")` (§10.4). |
+
+A single moment is read like a message, with `Entity.message(id:)` (§5.4.1).
+
+Like and unlike, as the web client sends them (not yet validated against
+the live schema, §10.5):
+
+```graphql
+mutation createReaction($input: CreateReactionInput!) {
+  createReaction(input: $input) { clientMutationId }
+}
+
+mutation deleteReaction($input: DeleteReactionInput!) {
+  deleteReaction(input: $input) { clientMutationId }
+}
+```
+
+```json
+{ "input": { "messageId": 987654321, "entityId": 123456789, "type": "LIKE" } }
+{ "input": { "messageId": 987654321, "entityId": 123456789 } }
+```
+
+`type` is only sent when creating. `LIKE` is the only value the web app uses.
+
 ---
 
 ## 6. Enumerations
@@ -879,6 +949,15 @@ Apps should both display and open `original` for images, falling back to
 A message's page in the web app (read from the web client's routes, not yet
 live-verified) is `https://classapp.com.br/entities/{entityId}/messages/{messageId}`,
 where `entityId` is the inbox entity reading it and both ids are `dbId`s.
+
+### 10.5 Moments
+
+| Item | Evidence | Notes |
+| --- | --- | --- |
+| `Entity.moments(limit, offset, search, orderBy)` with the selection of §5.6 | schema | Passes validation with `orderBy: [{column: CREATED, direction: DESC}]`. No moment has been seen in a real response yet, so value formats (for example `Message.type` of a moment, or video `mimetype`) are unconfirmed. |
+| `Media.mimetype`, `origName`, `thumbnail`, `width`, `height` on moment medias | schema | As above. |
+| `Organization.features { moments }` | schema | The web app's feature flag for the feed. |
+| `createReaction` / `deleteReaction` (§5.6) | web client only | Input shapes copied from the web client; not probed. |
 
 ---
 

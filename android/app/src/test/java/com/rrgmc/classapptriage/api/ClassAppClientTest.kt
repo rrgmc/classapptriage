@@ -2,6 +2,7 @@ package com.rrgmc.classapptriage.api
 
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -164,6 +165,47 @@ class ClassAppClientTest {
             assertEquals(5L, input["entityId"]!!.jsonPrimitive.long)
             assertEquals("true", input["deleteNotification"]!!.jsonPrimitive.content)
         }
+    }
+
+    @Test
+    fun momentsPageDecodesAndSorts() = runTest {
+        enqueue("""{"data":{"node":{"id":5,"moments":{"nodes":[
+            {"id":11,"created":"2026-01-02T10:00:00.000Z","content":"<p>Day #trip</p>","type":"MOMENT",
+             "entity":{"id":3,"fullname":"School"},"reaction":{"type":"LIKE"},"reactions":{"totalCount":4},
+             "medias":{"nodes":[{"id":1,"mimetype":"image/jpeg","uri":"u","original":"o","width":800,"height":600},
+                                {"id":2,"mimetype":"video/mp4","uri":"v","thumbnail":"t"}]}},
+            {"id":12,"reaction":null,"reactions":{"totalCount":0},"medias":{"nodes":[]}}
+        ],"pageInfo":{"hasNextPage":true}}}}}""")
+        val page = client().momentsPage(5, limit = 2, offset = 4)
+        val vars = takeBody().second["variables"]!!.jsonObject
+        assertEquals(4, vars["offset"]!!.jsonPrimitive.int)
+        val order = vars["orderBy"]!!.jsonArray.single().jsonObject
+        assertEquals("CREATED", order["column"]!!.jsonPrimitive.content)
+        assertEquals("DESC", order["direction"]!!.jsonPrimitive.content)
+        assertTrue(page.pageInfo.hasNextPage)
+        val (a, b) = page.moments
+        assertTrue(a.liked)
+        assertEquals(4, a.likes)
+        assertEquals("o", a.medias[0].original)
+        assertTrue(a.medias[1].isVideo)
+        assertFalse(b.liked)
+    }
+
+    @Test
+    fun likeAndUnlikeUseReactionMutations() = runTest {
+        enqueue("""{"data":{"createReaction":{"clientMutationId":null}}}""")
+        enqueue("""{"data":{"deleteReaction":{"clientMutationId":null}}}""")
+        client().setMomentLiked(5, 11, liked = true)
+        client().setMomentLiked(5, 11, liked = false)
+        val like = takeBody().second
+        assertEquals("createReaction", like["operationName"]!!.jsonPrimitive.content)
+        val likeInput = like["variables"]!!.jsonObject["input"]!!.jsonObject
+        assertEquals(11L, likeInput["messageId"]!!.jsonPrimitive.long)
+        assertEquals(5L, likeInput["entityId"]!!.jsonPrimitive.long)
+        assertEquals("LIKE", likeInput["type"]!!.jsonPrimitive.content)
+        val unlike = takeBody().second
+        assertEquals("deleteReaction", unlike["operationName"]!!.jsonPrimitive.content)
+        assertNull(unlike["variables"]!!.jsonObject["input"]!!.jsonObject["type"])
     }
 
     @Test

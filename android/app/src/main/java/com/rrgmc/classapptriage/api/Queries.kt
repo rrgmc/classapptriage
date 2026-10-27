@@ -152,6 +152,47 @@ query EntityLabelsQuery(${'$'}entityId: ID!, ${'$'}limit: Int) {
   }
 }"""
 
+/**
+ * The inbox's moments feed (docs/API.md §5.6). Unlike the web app, it does not
+ * pass `deleteNotifications` / `updateStatus` / `updateAccessed`, so browsing
+ * the feed changes no read state.
+ */
+internal const val QUERY_ENTITY_MOMENTS = """
+query EntityMomentsQuery(${'$'}entityId: ID!, ${'$'}limit: Int, ${'$'}offset: Int, ${'$'}search: String, ${'$'}orderBy: [EntityMomentsOrder]) {
+  node(id: ${'$'}entityId) {
+    ... on Entity {
+      id: dbId
+      moments(limit: ${'$'}limit, offset: ${'$'}offset, search: ${'$'}search, orderBy: ${'$'}orderBy) {
+        nodes {
+          id: dbId
+          created
+          content
+          type
+          entity { id: dbId fullname disabled picture { uri id: dbId key } }
+          reaction(entityId: ${'$'}entityId) { type }
+          reactions { totalCount }
+          medias { nodes { id: dbId mimetype uri original: uri(size: "w1280") thumbnail origName width height } }
+        }
+        pageInfo { hasPreviousPage hasNextPage }
+      }
+    }
+  }
+}"""
+
+internal const val MUTATION_CREATE_REACTION = """
+mutation createReaction(${'$'}input: CreateReactionInput!) {
+  createReaction(input: ${'$'}input) {
+    clientMutationId
+  }
+}"""
+
+internal const val MUTATION_DELETE_REACTION = """
+mutation deleteReaction(${'$'}input: DeleteReactionInput!) {
+  deleteReaction(input: ${'$'}input) {
+    clientMutationId
+  }
+}"""
+
 internal const val MUTATION_CREATE_MESSAGE_STATUS_IN_BATCH = """
 mutation createMessageStatusInBatch(${'$'}input: CreateMessageStatusInBatchInput!) {
   createMessageStatusInBatch(input: ${'$'}input) {
