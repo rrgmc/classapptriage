@@ -286,6 +286,69 @@ class ClassAppClient(
             .node?.organization?.labels?.nodes.orEmpty()
     }
 
+    // --- Moments ------------------------------------------------------------
+
+    @Serializable
+    private data class MomentsData(val node: Node? = null) {
+        @Serializable data class Node(val moments: Conn = Conn())
+        @Serializable data class Conn(val nodes: List<MomentNode> = emptyList(), val pageInfo: PageInfo = PageInfo())
+        @Serializable data class Reaction(val type: String? = null)
+        @Serializable data class Count(val totalCount: Int = 0)
+
+        @Serializable
+        data class MomentNode(
+            val id: Long = 0,
+            val created: String? = null,
+            val content: String? = null,
+            val entity: Entity? = null,
+            val reaction: Reaction? = null,
+            val reactions: Count = Count(),
+            val medias: Nodes<MomentMedia> = Nodes(),
+        ) {
+            fun moment() = Moment(
+                id, created, content, entity,
+                liked = !reaction?.type.isNullOrEmpty(),
+                likes = reactions.totalCount,
+                medias = medias.nodes,
+            )
+        }
+    }
+
+    /** Fetches one page of the moments feed of [entityId], newest first (docs/API.md §5.6). */
+    suspend fun momentsPage(entityId: Long, limit: Int = 20, offset: Int = 0): MomentsPage {
+        val vars = buildJsonObject {
+            put("entityId", entityId)
+            put("limit", limit)
+            put("offset", offset)
+            put("search", "")
+            putJsonArray("orderBy") {
+                add(buildJsonObject {
+                    put("column", "CREATED")
+                    put("direction", "DESC")
+                })
+            }
+        }
+        val conn = execute("EntityMomentsQuery", QUERY_ENTITY_MOMENTS, vars, MomentsData.serializer()).node?.moments
+            ?: throw ClassAppException("entity $entityId not found")
+        return MomentsPage(conn.nodes.map { it.moment() }, conn.pageInfo)
+    }
+
+    /** Likes ([liked] true) or unlikes moment [momentId] as [entityId]. */
+    suspend fun setMomentLiked(entityId: Long, momentId: Long, liked: Boolean) {
+        val vars = buildJsonObject {
+            put("input", buildJsonObject {
+                put("messageId", momentId)
+                put("entityId", entityId)
+                if (liked) put("type", "LIKE")
+            })
+        }
+        if (liked) {
+            execute("createReaction", MUTATION_CREATE_REACTION, vars, JsonElement.serializer())
+        } else {
+            execute("deleteReaction", MUTATION_DELETE_REACTION, vars, JsonElement.serializer())
+        }
+    }
+
     // --- Status -------------------------------------------------------------
 
     /**
@@ -413,6 +476,9 @@ class ClassAppClient(
         /** The message's page in the ClassApp web app, as seen from inbox [entityId]. */
         fun messageWebUrl(entityId: Long, messageId: Long): String =
             "$WEB_APP_URL/entities/$entityId/messages/$messageId"
+
+        /** The moments feed of inbox [entityId] in the ClassApp web app. */
+        fun momentsWebUrl(entityId: Long): String = "$WEB_APP_URL/entities/$entityId/moments"
 
         /** Whether the server accepts [QUERY_ENTITY_MESSAGES_RICH]; shared by all clients. */
         @Volatile

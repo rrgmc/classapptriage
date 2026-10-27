@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.MarkEmailRead
 import androidx.compose.material.icons.filled.MarkEmailUnread
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SwapHoriz
@@ -97,6 +98,7 @@ private data class PendingAction(val ids: List<Long>, val status: MessageStatus,
 fun MessagesScreen(
     onSwitchInbox: () -> Unit,
     onRules: () -> Unit,
+    onMoments: () -> Unit,
     onCreateRule: (RuleDraft) -> Unit,
     onOpen: (Long) -> Unit,
 ) {
@@ -220,6 +222,7 @@ fun MessagesScreen(
                     },
                     actions = {
                         IconButton(onClick = { vm.refresh() }) { Icon(Icons.Filled.Refresh, stringResource(R.string.action_refresh)) }
+                        IconButton(onClick = onMoments) { Icon(Icons.Filled.PhotoLibrary, stringResource(R.string.action_moments)) }
                         IconButton(onClick = onRules) { Icon(Icons.Filled.Tune, stringResource(R.string.action_rules)) }
                         Box {
                             IconButton(onClick = { menuOpen = true }) { Icon(Icons.Filled.MoreVert, stringResource(R.string.more)) }

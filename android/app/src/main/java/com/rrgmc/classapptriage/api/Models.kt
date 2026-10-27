@@ -185,6 +185,39 @@ object LenientBooleanSerializer : KSerializer<Boolean?> {
     }
 }
 
+/** A photo or video of a [Moment]. */
+@Serializable
+data class MomentMedia(
+    val id: Long = 0,
+    /** e.g. "image/jpeg", "video/mp4". */
+    val mimetype: String? = null,
+    val uri: String? = null,
+    /** `uri(size: "w1280")`, what the web app shows for images (docs/API.md §10.4). */
+    val original: String? = null,
+    val thumbnail: String? = null,
+    val origName: String? = null,
+    val width: Int = 0,
+    val height: Int = 0,
+) {
+    val isVideo: Boolean get() = mimetype?.startsWith("video/") == true
+}
+
+/** A post of the school's photo feed; a [Message] of its own type (docs/API.md §5.6). */
+data class Moment(
+    val id: Long,
+    val created: String?,
+    /** Caption; may be HTML. */
+    val content: String?,
+    val entity: Entity?,
+    /** Whether the inbox entity liked it. */
+    val liked: Boolean,
+    val likes: Int,
+    val medias: List<MomentMedia>,
+)
+
+/** A single page of the moments feed. */
+data class MomentsPage(val moments: List<Moment>, val pageInfo: PageInfo)
+
 /** A single page of a message listing. */
 data class MessagesPage(val messages: List<Message>, val pageInfo: PageInfo)
 

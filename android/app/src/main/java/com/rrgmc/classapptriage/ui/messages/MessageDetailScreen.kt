@@ -358,7 +358,7 @@ private fun UnsupportedCard(kind: UnsupportedContent?) {
     }
 }
 
-private fun looksLikeHtml(s: String) = Regex("<(p|br|div|span|a|b|i|strong|em|ul|ol|li|h[1-6])\\b", RegexOption.IGNORE_CASE).containsMatchIn(s)
+internal fun looksLikeHtml(s: String) = Regex("<(p|br|div|span|a|b|i|strong|em|ul|ol|li|h[1-6])\\b", RegexOption.IGNORE_CASE).containsMatchIn(s)
 
 /** Images are shown inline; every attachment opens in an external app on tap. */
 @Composable
